@@ -1,0 +1,153 @@
+<html lang="es">
+
+<head>
+	<title>Farmacias</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="author" content="autor" />
+	<meta name="description" content="descripción página">
+	<meta name="robots" content="index,follow">
+	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+
+	<!--
+
+		<link rel="stylesheet" href="css/leaflet-search.min.css" />
+		-->
+
+	<style>
+		body {
+			margin: 0;
+			padding: 0;
+			overflow: hidden;
+		}
+
+		#map {
+			height: 100%;
+			width: 100%;
+		}
+	</style>
+	<script>
+		//L_PREFER_CANVAS=true;
+	</script>
+	<script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+
+	<!--
+	<script src="js/leaflet.ajax.min.js"></script>
+	-->
+	<!--
+	<script src="js/leaflet-search.min.js"></script>
+	-->
+
+	<script>
+		var map, osm, esri;
+		var farmacias = null;
+		var controlCapas;
+		var controlEscala;
+
+		function init() {
+
+			map = L.map('map', {
+				center: [41.6863, 1.8382],
+				zoom: 8
+			});
+
+
+			esri = L.tileLayer(
+				'http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+					maxZoom: 17,
+					minZoom: 1,
+					attribution: 'Tiles © Esri',
+				}).addTo(map);
+
+			osm = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+				maxZoom: 19,
+				minZoom: 1,
+				attribution: 'OSM'
+			});
+
+
+
+			//farmacias= new L.GeoJSON.AJAX("../datos/farmacias.geojson");
+
+			/*
+				farmacias= new L.GeoJSON.AJAX("../datos/farmacias.geojson",
+				{
+				onEachFeature: function(feature, layer) {
+					popupContent = "<b>" + feature.properties.NOM + "</b>";
+					layer.bindPopup(popupContent);
+				},
+
+
+					pointToLayer: function (feature, latlng) {
+										return L.circleMarker(latlng, {
+											radius: 8,
+											fillColor: "#ff7800",
+											color: "#000",
+											weight: 1,
+											opacity: 1,
+											fillOpacity: 0.8
+										});
+										}
+									});
+
+
+
+				*/
+
+
+			var baseMaps = {
+				"Orto_esri": esri,
+				"Mapa_osm": osm
+			};
+
+			/*
+		var overlayMaps = {
+			"farmacias": farmacias
+		};
+*/
+			controlCapas = L.control.layers(baseMaps, null);
+			controlCapas.addTo(map);
+			controlEscala = L.control.scale();
+			controlEscala.addTo(map);
+
+			/*
+		var searchControl = new L.Control.Search({
+		layer: farmacias,
+		 propertyName: 'NOM',
+		  circleLocation:false});
+
+	searchControl.on('search_locationfound', function(feature) {
+
+		feature.layer.setStyle({fillColor: '#3f0', color: '#0f0'});
+		if(feature.layer._popup)
+			feature.layer.openPopup();
+
+	}).on('search_collapsed', function(e) {
+
+		farmacias.eachLayer(function(layer) {	r
+			farmacias.resetStyle(layer);
+		});
+	});
+
+	map.addControl( searchControl );
+
+		*/
+
+
+
+
+
+
+
+
+
+		}
+	</script>
+
+</head>
+
+<body onLoad="init()">
+	<div id="map"></div>
+</body>
+
+</html>

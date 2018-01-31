@@ -1,0 +1,58 @@
+<html lang="es">
+<head>
+	<title>Ejemplo 3 Leaflet</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="author" content="autor"/>
+	<meta name="description" content="descripción página">
+	<meta name="robots" content="index,follow">
+	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+	<style>
+		body {
+			margin: 0;
+		}
+		#map {
+			height: 100%;
+			width: 100%;
+			background-color: #ffffff
+		}
+	</style>
+<script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+<script src="js/leaflet.ajax.min.js"></script>
+<script>
+var map,osm;
+ function init(){
+	 map = L.map('map', {
+ 			center: [41.6863, 1.8382],
+ 			zoom: 8
+ 	});
+ 		osm = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+ 				maxZoom: 19,
+ 				minZoom: 1,
+ 				attribution: 'OSM'
+ 		});
+ 		osm.addTo(map);
+
+ 	var capaGeoJson=L.geoJson.ajax('../datos/comarcas.geojson', {
+
+				//style:{color:'#ff0000'}
+
+				style: function (feature) {
+							return {color:'#ff0000'};
+				},
+
+
+			onEachFeature: function(feature, layer) {
+		 			popupContent ="<b>"+feature.properties.NOM+"</b>";
+		 			layer.bindPopup(popupContent);
+		 		}
+		}).addTo(map);
+
+ }
+
+</script>
+</head>
+<body onLoad="init()">
+	<div id="map"></div>
+</body>
+</html>

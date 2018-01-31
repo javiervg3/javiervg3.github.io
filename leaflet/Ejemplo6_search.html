@@ -1,0 +1,101 @@
+<html lang="es">
+
+<head>
+	<title>Ejemplo 5 Leaflet</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="author" content="autor" />
+	<meta name="description" content="descripción página">
+	<meta name="robots" content="index,follow">
+	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+	<link rel="stylesheet" href="css/leaflet-search.min.css" />
+
+	<style>
+		body {
+			margin: 0;
+		}
+
+		#map {
+			height: 100%;
+			width: 100%;
+			background-color: #ffffff
+		}
+	</style>
+	<script>
+		L_PREFER_CANVAS=true;
+	</script>
+	<script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+	<script src="js/leaflet.ajax.min.js"></script>
+	<script src="js/leaflet-search.min.js"></script>
+
+	<script>
+		var map, osm;
+		var capaGeoJson;
+		function init() {
+
+			map = L.map('map', {
+				center: [39.7202, 2.9102],
+				zoom: 17,
+			});
+			osm = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+				maxZoom: 19,
+				minZoom: 1,
+				attribution: 'OSM'
+			});
+			osm.addTo(map);
+
+
+
+			capaGeoJson = L.geoJson.ajax('../datos/parceinca.geojson', {
+				style: {
+					"color": "#ff7800",
+					"fillColor": '#00ff00',
+					"weight": 1,
+					"opacity": 0.8
+				},
+
+				onEachFeature: function(feature, layer) {
+
+					popupContent = "<b>" + feature.properties.REFCAT + "</b>";
+					layer.bindPopup(popupContent);
+				}
+
+			}).addTo(map);
+
+
+
+			var searchControl = new L.Control.Search({
+				layer: capaGeoJson,
+				propertyName: 'REFCAT',
+				circleLocation: false
+			});
+
+			searchControl.on('search_locationfound', function(feature) {
+				feature.layer.setStyle({
+					fillColor: '#ff0000',
+					weight: 2,
+					opacity: 1
+				});
+
+			}).on('search_collapsed', function() {
+				  capaGeoJson.eachLayer(function(layer) {
+					    capaGeoJson.resetStyle(layer);
+			   	});
+			});
+
+			map.addControl(searchControl);
+
+
+
+
+
+		}
+	</script>
+
+</head>
+
+<body onLoad="init()">
+	<div id="map"></div>
+</body>
+
+</html>
