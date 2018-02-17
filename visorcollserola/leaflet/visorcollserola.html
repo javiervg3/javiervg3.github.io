@@ -1,0 +1,166 @@
+<html lang="es">
+
+<head>
+	<title>visor d'inventaris PNSC</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="author" content="autor" />
+	<meta name="description" content="descripción página">
+	<meta name="robots" content="index,follow">
+	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+	<link rel="stylesheet" href="css/leaflet-search.min.css" />
+
+	<style>
+		body {
+			margin: 0;
+			padding: 0;
+			overflow: hidden;
+		}
+
+		#map {
+			height: 100%;
+			width: 100%;
+			background-color: #ffffff
+		}
+
+		#fitxa {
+			top: 128px;
+			position: absolute;
+			right: 10px;
+			width: 200px;
+			background-color: rgb(255, 255, 255);
+			z-index: 1000;
+			height: 400px;
+			padding: 10px;
+			border-radius: 6px;
+			opacity: 0.85;
+
+		}
+
+	</style>
+
+	<script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+	<script src="js/leaflet.ajax.min.js"></script>
+	<script src="js/leaflet-search.min.js"></script>
+
+	<script>
+		var map;
+		var ortoICGC;
+		var mapaICGC;
+		var catalegConstruccions;
+		var catalegCamins;
+		var controlCapas;
+
+		function init() {
+
+			map = L.map('map', {
+				center: [41.434974, 2.091355],
+				zoom: 13
+			});
+
+			ortoICGC = L.tileLayer(
+				'https://geoserveis.icgc.cat/icc_mapesmultibase/noutm/wmts/orto/GRID3857/{z}/{x}/{y}.jpeg', {
+					maxZoom: 19,
+					minZoom: 13,
+					attribution: 'Orto ICGC',
+
+			}).addTo(map);
+
+
+			mapaICGC = L.tileLayer(
+				'https://geoserveis.icgc.cat/icc_mapesmultibase/noutm/wmts/topo/GRID3857/{z}/{x}/{y}.jpeg', {
+				maxZoom: 19,
+				minZoom: 13,
+				attribution: 'Mapa ICGC'
+			});
+
+
+			var catalegConstruccions = L.geoJson.ajax('../datos/cataleg_construccions_4326.geojson', {
+
+				style: function(feature) {
+					var _color = {
+						color: '#ffffff',
+						weight: 2,
+						fillOpacity: 0.8,
+						fillColor: '#DD0000'
+					};
+
+					return _color;
+				},
+
+				onEachFeature: function(feature, layer) {
+					popupContent =
+					"<img src='.../fotos/" + feature.properties.ID_FOTO +".jpg'>"+
+					"<br> " + feature.properties.ID_MASIA + " " + feature.properties.LOC_NOM +  "</br>" +
+					"<br>ADREÇA: " + feature.properties.LOC_ADR + "</br>" +
+					"<br>MUNICIPI: " + feature.properties.LOC_CODIIN + " " +feature.properties.LOC_MUN + "</br>" +
+					"<br>TIPOLOGIA: " + feature.properties.TIP_TIP + "</br>" +
+					"<br>REF. CADASTRAL: " + feature.properties.DAD_REFCAD + "</br>" +
+					"<br>TITULARITAT: " + feature.properties.DAD_REFC_2 + "</br>" +
+					"<br>" + feature.properties.DADES_VOL + "</br>"
+					;
+					layer.bindPopup(popupContent);
+				}
+			}).addTo(map);
+
+
+			var searchControl = new L.Control.Search({
+				layer: catalegConstruccions,
+				propertyName: 'ID_MASIA',
+				circleLocation: true
+			});
+
+			searchControl.on('search_locationfound', function(feature) {
+				feature.layer.setStyle({
+					fillColor: '#ff0000',
+					weight: 2,
+					opacity: 1,
+				});
+
+			}).on('search_collapsed', function() {
+				catalegConstruccions.eachLayer(function(layer) {
+				catalegConstruccions.resetStyle(layer);
+				});
+			});
+
+			map.addControl(searchControl);
+
+			var baseMaps = {
+				"Orto_ICGC": ortoICGC,
+				"Mapa_ICGC": mapaICGC
+			};
+
+			var overlayMaps = {
+				"catàleg de construccions": catalegConstruccions,
+				
+								
+			};
+
+			controlCapas = L.control.layers(baseMaps, overlayMaps, {
+				collapsed: false
+			});
+			controlCapas.addTo(map);
+			controlEscala = L.control.scale();
+			controlEscala.addTo(map);
+
+			function escriu(e) {
+
+			console.info(e.target.feature.properties);
+			var txt = "<b>Contruccions</b>" +
+
+				"<p>" + e.target.feature.properties.ID_MASIA + "</p>";
+				
+			document.getElementById('titulo').innerHTML=txt;
+
+			};
+
+				}
+	</script>
+</head>
+
+<body onLoad="init()">
+	<div id="map"></div>
+	<div id="fitxa">catàleg de construccions</div>
+</body>
+
+</html>
