@@ -36,7 +36,7 @@
 			font-family: calibri;
 			font-size:18px;
 			left:50px;
-			top:238px;
+			top:74px;
 		}
 
 		#cercanom{
@@ -52,7 +52,7 @@
 			font-family: calibri;
 			font-size:18px;
 			left:50px;
-			top:274px;
+			top:110px;
 		}
 
 		#fitxa {
@@ -66,12 +66,7 @@
 			height: 94%;
 			padding: 10px;
 			border-radius: 6px;
-			font-family: calibri;
-			opacity: 0.9;
-
-		#codinom {
-
-		}
+			opacity: 0.85;
 
 		}
 
@@ -195,11 +190,22 @@
 				},
 
 				onEachFeature: function(feature, layer) {
-					
-					layer.on('click',escriu);
+					popupContent =
+					"<img src='.../fotos/" + feature.properties.ID_FOTO +".jpg'>"+
+					"<br> " + feature.properties.ID_MASIA + " " + feature.properties.LOC_NOM +  "</br>" +
+					"<br>ADREÇA: " + feature.properties.LOC_ADR + "</br>" +
+					"<br>MUNICIPI: " + feature.properties.LOC_CODIIN + " " +feature.properties.LOC_MUN + "</br>" +
+					"<br>TIPOLOGIA: " + feature.properties.TIP_TIP + "</br>" +
+					"<br>REF. CADASTRAL: " + feature.properties.DAD_REFCAD + "</br>" +
+					"<br>SOSTRE: " + feature.properties.DAD_REFC_1 + "m2</br>" +
+					"<br>TITULARITAT: " + feature.properties.DAD_REFC_2 + "</br>" +
+					"<br>CAMÍ D'ACCÉS: " + feature.properties.ACCES_CODI + "</br>" +
+					"<br>" + feature.properties.DADES_VOL + "</br>"
+					;
+					layer.bindPopup(popupContent);
 				}
 
-			});
+			}).addTo(map);
 
 			
 			var searchControlCodi = new L.Control.Search({
@@ -221,7 +227,8 @@
 				});
 			});
 
-			
+			map.addControl(searchControlCodi);
+
 			var searchControlNom = new L.Control.Search({
 				layer: catalegConstruccions,
 				propertyName: 'LOC_NOM',
@@ -240,8 +247,8 @@
 				catalegConstruccions.resetStyle(layer);
 				});
 			});
-			
-			
+
+			map.addControl(searchControlNom);
 
 
 			var baseMaps = {
@@ -251,9 +258,9 @@
 
 			var overlayMaps = {
 				"Delimitació del PNSC": limitPNSC,
-				"Delimitació municipal": limitMuni,			
-				"Inventari de Construccions": catalegConstruccions,
-				"Unitats de Finca": unitatsFinca
+				"Delimitació municipal": limitMuni,
+				"Catàleg de Construccions": catalegConstruccions,
+				"Unitats de Finca": unitatsFinca,
 			};
 
 			controlCapas = L.control.layers(baseMaps, overlayMaps, {
@@ -270,29 +277,17 @@
 			});
 
 			controlEscala.addTo(map);
-			map.addControl(searchControlCodi);
 
-			map.addControl(searchControlNom);
 
 
 			function escriu(e) {
 
 			console.info(e.target.feature.properties);
-			var txt = 
-					"<img width=300 src='../fotos/" + e.target.feature.properties.ID_FOTO +".jpg'>"+
-					"<br> " + " " + "</br>" +
-					"<br> " + e.target.feature.properties.ID_MASIA + " " + e.target.feature.properties.LOC_NOM +  "</br>" +
-					"<br>ADREÇA: " + e.target.feature.properties.LOC_ADR + "</br>" +
-					"<br>MUNICIPI: " + e.target.feature.properties.LOC_CODIIN + " " +e.target.feature.properties.LOC_MUN + "</br>" +
-					"<br>TIPOLOGIA: " + e.target.feature.properties.TIP_TIP + "</br>" +
-					"<br>REF. CADASTRAL: " + e.target.feature.properties.DAD_REFCAD + "</br>" +
-					"<br>SOSTRE: " + e.target.feature.properties.DAD_REFC_1 + "m2</br>" +
-					"<br>TITULARITAT: " + e.target.feature.properties.DAD_REFC_2 + "</br>" +
-					"<br>CAMÍ D'ACCÉS: " + e.target.feature.properties.ACCES_CODI + "</br>" +
-					"<br>" + e.target.feature.properties.DADES_VOL + "</br>"
-					;
+			var txt = "<b>Contruccions</b>" +
+
+				"<p>" + e.target.feature.properties.ID_MASIA + "</p>";
 				
-			document.getElementById('fitxa').innerHTML=txt;
+			document.getElementById('titulo').innerHTML=txt;
 
 			};
 
@@ -304,10 +299,7 @@
 	<div id="map"></div>
 	<div id="cercacodi">cerca per codi</div>
 	<div id="cercanom">cerca per nom</div>
-	<div id="fitxa"
-		<p>INVENTARI DE CONSTRUCCIONS</p>	
-			
-	</div>
+	<div id="fitxa"></div>
 </body>
 
 </html>
