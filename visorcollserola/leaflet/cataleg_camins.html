@@ -1,0 +1,272 @@
+<html lang="es">
+
+<head>
+	<title>Catàleg de Camins</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="author" content="autor" />
+	<meta name="description" content="descripción página">
+	<meta name="robots" content="index,follow">
+	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+	<link rel="stylesheet" href="css/leaflet-search.min.css" />
+
+	<style>
+		body {
+			margin: 0;
+			padding: 0;
+			overflow: hidden;
+		}
+
+		#map {
+			height: 100%;
+			width: 100%;
+			background-color: #ffffff
+		}
+
+		#cercacodi{
+			position: absolute;
+			top:5px;
+			left:40%
+			z-index:1;
+			background-color: #ffffff;
+			color: #000000;
+			padding:2px 15px 2px 6px;
+			opacity:0.9;
+			border-radius:3px;
+			font-family: calibri;
+			font-size:18px;
+			left:50px;
+			top:74px;
+		}
+
+		#cercanom{
+			position: absolute;
+			top:5px;
+			left:40%
+			z-index:1;
+			background-color: #ffffff;
+			color: #000000;
+			padding:2px 11px 2px 6px;
+			opacity:0.9;
+			border-radius:3px;
+			font-family: calibri;
+			font-size:18px;
+			left:50px;
+			top:110px;
+		}
+
+		#fitxa {
+			top: 10px;
+			bottom: 10px;
+			position: absolute;
+			right: 10px;
+			width: 300px;
+			background-color: rgb(255, 255, 255);
+			z-index: 1000;
+			height: 94%;
+			padding: 10px;
+			border-radius: 6px;
+			opacity: 0.85;
+
+		}
+
+	</style>
+
+	<script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+	<script src="js/leaflet.ajax.min.js"></script>
+	<script src="js/leaflet-search.min.js"></script>
+
+	<script>
+		var map;
+		var ortoICGC;
+		var mapaICGC;
+		var mascaraPNSC;
+		var limitPNSC;
+		var limitMuni;
+		var catalegCamins;
+		var controlCapas;
+
+		function init() {
+
+			map = L.map('map', {
+				center: [41.434974, 2.091355],
+				zoom: 13
+			});
+
+			ortoICGC = L.tileLayer(
+				'https://geoserveis.icgc.cat/icc_mapesmultibase/noutm/wmts/orto/GRID3857/{z}/{x}/{y}.jpeg', {
+					maxZoom: 19,
+					minZoom: 13,
+					attribution: 'Orto ICGC',
+
+			}).addTo(map);
+
+
+			mapaICGC = L.tileLayer(
+				'https://geoserveis.icgc.cat/icc_mapesmultibase/noutm/wmts/topo/GRID3857/{z}/{x}/{y}.jpeg', {
+				maxZoom: 19,
+				minZoom: 13,
+				attribution: 'Mapa ICGC'
+			});
+
+			var mascaraPNSC = L.geoJson.ajax('../datos/mascaraPNSC_4326.geojson', {
+
+				style: function(feature) {
+					var _color = {
+						color: '#ffffff',
+						weight: 0,
+						fillOpacity: 0.3,
+						fillColor: '#ffffff'
+					};
+
+					return _color;
+				},
+
+			}).addTo(map);
+
+			var limitPNSC = L.geoJson.ajax('../datos/limitPNSC_4326.geojson', {
+
+				style: function(feature) {
+					var _color = {
+						color: '#009600',
+						weight: 4,
+						fillOpacity: 1,
+					};
+
+					return _color;
+				},
+				
+			}).addTo(map);
+
+
+			var limitMuni = L.geoJson.ajax('../datos/limitMuni_4326.geojson', {
+
+				style: function(feature) {
+					var _color = {
+						color: '#ffff64',
+						weight: 3,
+						fillOpacity: 1,
+					};
+
+					return _color;
+				},
+
+			}).addTo(map);
+
+
+			var catalegCamins = L.geoJson.ajax('../datos/cataleg_camins_4326.geojson', {
+
+				style: function(feature) {
+					var _color = {
+						color: '#DD0000',
+						weight: 4,
+						fillOpacity: 1,
+					};
+					return _color;
+				},
+
+				onEachFeature: function(feature, layer) {
+					popupContent =
+					"<br>CAMÍ: " + feature.properties.CODIPEPNAT + " " + feature.properties.NOMCAMI +  "</br>" +
+					"<br>LONGITUT: " + feature.properties.LONGITUD + "m2" + "</br>" 
+					;
+					layer.bindPopup(popupContent);
+				}
+
+			}).addTo(map);
+
+
+			var searchControlCodi = new L.Control.Search({
+				layer: catalegCamins,
+				propertyName: 'CODIPEPNAT',
+				circleLocation: true
+			});
+
+			searchControlCodi.on('search_locationfound', function(feature) {
+				feature.layer.setStyle({
+					fillColor: '#ff0000',
+					weight: 10,
+					opacity: 1,
+				});
+
+			}).on('search_collapsed', function() {
+				catalegCamins.eachLayer(function(layer) {
+				catalegCamins.resetStyle(layer);
+				});
+			});
+
+			map.addControl(searchControlCodi);
+
+			var searchControlNom = new L.Control.Search({
+				layer: catalegCamins,
+				propertyName: 'NOMCAMI',
+				circleLocation: true
+			});
+
+			searchControlNom.on('search_locationfound', function(feature) {
+				feature.layer.setStyle({
+					fillColor: '#ff0000',
+					weight: 2,
+					opacity: 1,
+				});
+
+			}).on('search_collapsed', function() {
+				catalegCamins.eachLayer(function(layer) {
+				catalegCamins.resetStyle(layer);
+				});
+			});
+
+			map.addControl(searchControlNom);
+
+
+			var baseMaps = {
+				"Ortofoto ICGC": ortoICGC,
+				"Mapa Topogràfic ICGC": mapaICGC
+			};
+
+			var overlayMaps = {
+				"Delimitació del PNSC": limitPNSC,
+				"Delimitació municipal": limitMuni,
+				"Catàleg de Camins": catalegCamins,
+			};
+
+			controlCapas = L.control.layers(baseMaps, overlayMaps, {
+				collapsed: false,
+				position: 'topleft'
+
+			});
+
+			controlCapas.addTo(map);
+
+			controlEscala = L.control.scale({
+				position: 'bottomleft'
+
+			});
+
+			controlEscala.addTo(map);
+
+
+
+			function escriu(e) {
+
+			console.info(e.target.feature.properties);
+			var txt = "<b>Contruccions</b>" +
+
+				"<p>" + e.target.feature.properties.ID_MASIA + "</p>";
+				
+			document.getElementById('titulo').innerHTML=txt;
+
+			};
+
+				}
+	</script>
+</head>
+
+<body onLoad="init()">
+	<div id="map"></div>
+	<div id="cercacodi">cerca per codi</div>
+	<div id="cercanom">cerca per nom</div>
+	<div id="fitxa"></div>
+</body>
+
+</html>
