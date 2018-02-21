@@ -1,0 +1,70 @@
+ul,ol{list-style:none}
+h1,h2,h3,h4,h5,h6,pre,code{font-size:1em;}
+ul,ol,li,h1,h2,h3,h4,h5,h6,pre,form,body,html,p,blockquote,fieldset{
+margin:0;padding:0;line-height:1; list-style:none;}
+a img,:link img,:visited img, fieldset{border:none;}
+input[type=submit], input[type=reset], input[type=button] { *filter:chroma(color=#000000); }
+
+
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+#map {
+    height: 100%;
+    width: 100%;
+    background-color: #ffffff
+}
+
+#cercacodi{
+    position: absolute;
+    top:5px;
+    left:40%
+    z-index:1;
+    background-color: #ffffff;
+    color: #000000;
+    padding:2px 28px 2px 6px;
+    opacity:0.9;
+    border-radius:3px;
+    font-family: calibri;
+    font-size:18px;
+    left:50px;
+    top:215px;
+}
+
+#cercanom{
+    position: absolute;
+    top:5px;
+    left:40%
+    z-index:1;
+    background-color: #ffffff;
+    color: #000000;
+    padding:2px 24px 2px 6px;
+    opacity:0.9;
+    border-radius:3px;
+    font-family: calibri;
+    font-size:18px;
+    left:50px;
+    top:250px;
+}
+
+#fitxa {
+    top: 10px;
+    bottom: 10px;
+    position: absolute;
+    right: 10px;
+    width: 300px;
+    background-color: rgb(255, 255, 255);
+    z-index: 1000;
+    height: 94%;
+    padding: 10px;
+    border-radius: 6px;
+    font-family: calibri;
+    opacity: 0.9;
+    overflow-y:scroll;
+
+
+
+}

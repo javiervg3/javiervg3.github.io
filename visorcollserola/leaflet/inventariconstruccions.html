@@ -1,82 +1,15 @@
 <html lang="es">
 
 <head>
-	<title>Catàleg de Construccions</title>
+	<link href="inventariconstruccions.css" rel="stylesheet" type="text/css" />
 	<meta charset="utf-8" />
+	<title>Inventari de Construccions</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta name="author" content="autor" />
 	<meta name="description" content="descripción página">
 	<meta name="robots" content="index,follow">
 	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
 	<link rel="stylesheet" href="css/leaflet-search.min.css" />
-
-	<style>
-		body {
-			margin: 0;
-			padding: 0;
-			overflow: hidden;
-		}
-
-		#map {
-			height: 100%;
-			width: 100%;
-			background-color: #ffffff
-		}
-
-		#cercacodi{
-			position: absolute;
-			top:5px;
-			left:40%
-			z-index:1;
-			background-color: #ffffff;
-			color: #000000;
-			padding:2px 28px 2px 6px;
-			opacity:0.9;
-			border-radius:3px;
-			font-family: calibri;
-			font-size:18px;
-			left:50px;
-			top:238px;
-		}
-
-		#cercanom{
-			position: absolute;
-			top:5px;
-			left:40%
-			z-index:1;
-			background-color: #ffffff;
-			color: #000000;
-			padding:2px 24px 2px 6px;
-			opacity:0.9;
-			border-radius:3px;
-			font-family: calibri;
-			font-size:18px;
-			left:50px;
-			top:274px;
-		}
-
-		#fitxa {
-			top: 10px;
-			bottom: 10px;
-			position: absolute;
-			right: 10px;
-			width: 300px;
-			background-color: rgb(255, 255, 255);
-			z-index: 1000;
-			height: 94%;
-			padding: 10px;
-			border-radius: 6px;
-			font-family: calibri;
-			opacity: 0.9;
-			overflow-y:scroll;
-
-		#codinom {
-
-		}
-
-		}
-
-	</style>
 
 	<script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
 	<script src="js/leaflet.ajax.min.js"></script>
@@ -107,7 +40,6 @@
 					attribution: 'Orto ICGC',
 
 			}).addTo(map);
-
 
 			mapaICGC = L.tileLayer(
 				'https://geoserveis.icgc.cat/icc_mapesmultibase/noutm/wmts/topo/GRID3857/{z}/{x}/{y}.jpeg', {
@@ -174,12 +106,16 @@
 
 				onEachFeature: function(feature, layer) {
 					popupContent =
-					"<img src='.../fotos/" + feature.properties.ID_FOTO +".jpg'>"+
+					"<br>UNITAT DE FINCA</br>" +
+					"<br> " + " " + "</br>" +
+					"<img width=150 src='../fotos/" + feature.properties.ID_FOTO +".jpg'>"+
+					"<br> " + " " + "</br>" +
 					"<br> " + feature.properties.ID_CONSTRU + " " + feature.properties.NOMFINCA +  "</br>" +
 					"<br>SUPERFÍCIE: " + feature.properties.SAREA + "</br>" 
 					;
 					layer.bindPopup(popupContent);
 				}
+
 			});
 
 			var catalegConstruccions = L.geoJson.ajax('../datos/cataleg_construccions_4326.geojson', {
@@ -197,7 +133,7 @@
 
 				onEachFeature: function(feature, layer) {
 					
-					layer.on('click',escriu);
+					layer.on('click',escriuConstru);
 				}
 
 			});
@@ -276,11 +212,13 @@
 			map.addControl(searchControlNom);
 
 
-			function escriu(e) {
+			function escriuConstru(e) {
 
 			console.info(e.target.feature.properties);
-			var txt = 
-					"<img width=300 src='../fotos/" + e.target.feature.properties.ID_FOTO +".jpg'>"+
+			var txtConstruccions = 
+					"<br>INVENTARI DE CONSTRUCCIONS</br>" +
+					"<br> " + " " + "</br>" +
+					"<img width=280 src='../fotos/" + e.target.feature.properties.ID_FOTO +".jpg'>"+
 					"<br> " + " " + "</br>" +
 					"<br> " + e.target.feature.properties.ID_MASIA + " " + e.target.feature.properties.LOC_NOM +  "</br>" +
 					"<br>ADREÇA: " + e.target.feature.properties.LOC_ADR + "</br>" +
@@ -291,13 +229,14 @@
 					"<br>TITULARITAT: " + e.target.feature.properties.DAD_REFC_2 + "</br>" +
 					"<br>CAMÍ D'ACCÉS: " + e.target.feature.properties.ACCES_CODI + "</br>" +
 					"<br>" + e.target.feature.properties.DADES_VOL + "</br>"
-					;
+					"<a href='../pdf/" + e.target.feature.properties.ID_FOTO + ".pdf'>" + "VEURE FITXA COMPLETA" + "</a>"			
+				;
 				
-			document.getElementById('fitxa').innerHTML=txt;
+			document.getElementById('fitxa').innerHTML=txtConstruccions;
 
 			};
 
-				}
+		}
 	</script>
 </head>
 
@@ -305,10 +244,10 @@
 	<div id="map"></div>
 	<div id="cercacodi">cerca per codi</div>
 	<div id="cercanom">cerca per nom</div>
-	<div id="fitxa"
-		<p>INVENTARI DE CONSTRUCCIONS</p>	
-			
-	</div>
+	<div id="fitxa"></div>
+
+	
+	
 </body>
 
 </html>
