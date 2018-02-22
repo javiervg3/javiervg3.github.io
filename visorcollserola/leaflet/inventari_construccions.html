@@ -1,0 +1,263 @@
+<html lang="es">
+
+<head>
+	<link href="inventariconstruccions.css" rel="stylesheet" type="text/css" />
+	<meta charset="utf-8" />
+	<title>Inventari de Construccions</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="author" content="autor" />
+	<meta name="description" content="descripción página">
+	<meta name="robots" content="index,follow">
+	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+	<link rel="stylesheet" href="css/leaflet-search.min.css" />
+
+	<script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+	<script src="js/leaflet.ajax.min.js"></script>
+	<script src="js/leaflet-search.min.js"></script>
+	<style>
+		.nommasia{	
+			font-size: 20px;
+		}
+	</style>
+	<script>
+		var map;
+		var ortoICGC;
+		var mapaICGC;
+		var mascaraPNSC;
+		var limitPNSC;
+		var limitMuni;
+		var inventariConstruccions;
+		var unitatsFinca;
+		var controlCapas;
+
+		function init() {
+
+			map = L.map('map', {
+				center: [41.434974, 2.091355],
+				zoom: 13
+			});
+
+			ortoICGC = L.tileLayer(
+				'https://geoserveis.icgc.cat/icc_mapesmultibase/noutm/wmts/orto/GRID3857/{z}/{x}/{y}.jpeg', {
+					maxZoom: 19,
+					minZoom: 13,
+					attribution: 'Orto ICGC',
+
+			}).addTo(map);
+
+			mapaICGC = L.tileLayer(
+				'https://geoserveis.icgc.cat/icc_mapesmultibase/noutm/wmts/topo/GRID3857/{z}/{x}/{y}.jpeg', {
+				maxZoom: 19,
+				minZoom: 13,
+				attribution: 'Mapa ICGC'
+			});
+
+			var mascaraPNSC = L.geoJson.ajax('../datos/mascaraPNSC_4326.geojson', {
+
+				style: function(feature) {
+					var _color = {
+						color: '#ffffff',
+						weight: 0,
+						fillOpacity: 0.3,
+						fillColor: '#ffffff'
+					};
+
+					return _color;
+				},
+
+			}).addTo(map);
+
+			var limitPNSC = L.geoJson.ajax('../datos/limitPNSC_4326.geojson', {
+
+				style: function(feature) {
+					var _color = {
+						color: '#009600',
+						weight: 4,
+						fillOpacity: 1,
+					};
+
+					return _color;
+				},
+				
+			}).addTo(map);
+
+
+			var limitMuni = L.geoJson.ajax('../datos/limitMuni_4326.geojson', {
+
+				style: function(feature) {
+					var _color = {
+						color: '#ffff64',
+						weight: 3,
+						fillOpacity: 1,
+					};
+
+					return _color;
+				},
+
+			}).addTo(map);
+
+			var unitatsFinca = L.geoJson.ajax('../datos/unitatsFinca_4326.geojson', {
+
+				style: function(feature) {
+					var _color = {
+						color: '#ffffff',
+						weight: 1,
+						fillOpacity: 0.3,
+						fillColor: '#ffbf6c'
+					};
+					return _color;
+				},
+
+				onEachFeature: function(feature, layer) {
+					popupContent =
+					"<br>UNITAT DE FINCA</br>" +
+					"<br> " + " " + "</br>" +
+					"<img width=150 src='../fotos/" + feature.properties.ID_FOTO +".jpg'>"+
+					"<br> " + " " + "</br>" +
+					"<br> " + feature.properties.ID_CONSTRU + " " + feature.properties.NOMFINCA +  "</br>" +
+					"<br>SUPERFÍCIE: " + feature.properties.AREA + "ha</br>" 
+					;
+					layer.bindPopup(popupContent);
+				}
+
+			});
+
+			var inventariConstruccions = L.geoJson.ajax('../datos/inventari_construccions_4326.geojson', {
+
+				style: function(feature) {
+					var _color = {
+						color: '#ffffff',
+						weight: 2,
+						fillOpacity: 0.8,
+						fillColor: '#DD0000'
+					};
+
+					return _color;
+				},
+
+				onEachFeature: function(feature, layer) {
+					
+					layer.on('click',escriuConstru);
+				}
+
+			});
+
+			
+			var searchControlCodi = new L.Control.Search({
+				layer: inventariConstruccions,
+				propertyName: 'ID_MASIA',
+				circleLocation: true
+			});
+
+			
+
+
+			var baseMaps = {
+				"Ortofoto ICGC": ortoICGC,
+				"Mapa Topogràfic ICGC": mapaICGC
+			};
+
+			var overlayMaps = {
+				"Delimitació del PNSC": limitPNSC,
+				"Delimitació municipal": limitMuni,	
+				"Unitats de Finca": unitatsFinca,				
+				"Inventari de Construccions": inventariConstruccions
+				
+			};
+
+			controlCapas = L.control.layers(baseMaps, overlayMaps, {
+				collapsed: false,
+				position: 'topleft'
+
+			});
+
+			controlCapas.addTo(map);
+
+			controlEscala = L.control.scale({
+				position: 'bottomleft'
+
+			});
+
+			controlEscala.addTo(map);
+			
+			
+			searchControlCodi.on('search_locationfound', function(feature) {
+				feature.layer.setStyle({
+					fillColor: '#ff0000',
+					weight: 10,
+					opacity: 1,
+				});
+
+			}).on('search_collapsed', function() {
+				inventariConstruccions.eachLayer(function(layer) {
+				inventariConstruccions.resetStyle(layer);
+				});
+			});
+
+			
+			var searchControlNom = new L.Control.Search({
+				layer: inventariConstruccions,
+				propertyName: 'LOC_NOM',
+				circleLocation: true
+			});
+
+			searchControlNom.on('search_locationfound', function(feature) {
+				feature.layer.setStyle({
+					fillColor: '#ff0000',
+					weight: 2,
+					opacity: 1,
+				});
+
+			}).on('search_collapsed', function() {
+				inventariConstruccions.eachLayer(function(layer) {
+				inventariConstruccions.resetStyle(layer);
+				});
+			});
+			
+			map.addControl(searchControlCodi);
+
+			map.addControl(searchControlNom);
+
+			
+
+			function escriuConstru(e) {
+
+			console.info(e.target.feature.properties);
+			var txtConstruccions = "<div class='fitxa'>"+
+					"<br>INVENTARI DE CONSTRUCCIONS</br>" +
+					"<br> " + " " + "</br>" +
+					"<img width=280 src='../fotos/" + e.target.feature.properties.ID_FOTO +".jpg'>"+
+					"<br> " + " " + "</br>" +
+					"<br> " + e.target.feature.properties.ID_MASIA + " " + e.target.feature.properties.LOC_NOM +  "</br>" +
+					"<br>ADREÇA: " + e.target.feature.properties.LOC_ADR + "</br>" +
+					"<br>MUNICIPI: " + e.target.feature.properties.LOC_CODIIN + " " +e.target.feature.properties.LOC_MUN + "</br>" +
+					"<br>TIPOLOGIA: " + e.target.feature.properties.TIP_TIP + "</br>" +
+					"<br>REF. CADASTRAL: " + e.target.feature.properties.DAD_REFCAD + "</br>" +
+					"<br>SOSTRE: " + e.target.feature.properties.DAD_REFC_1 + "m2</br>" +
+					"<br>TITULARITAT: " + e.target.feature.properties.DAD_REFC_2 + "</br>" +
+					"<br>CAMÍ D'ACCÉS: " + e.target.feature.properties.ACCES_CODI + "</br>" +
+					"<br>" + e.target.feature.properties.DADES_VOL + "</br>"+
+					"<br> " + " " + "</br>" +
+					"<br><a target='_blank' href='../pdf/" + e.target.feature.properties.ID_PDF + ".pdf'>" + "VEURE FITXA COMPLETA" + "</a>" + "</br>"	
+					
+				;
+				
+			document.getElementById('fitxa').innerHTML=txtConstruccions;
+
+			};
+
+		}
+	</script>
+</head>
+
+<body onLoad="init()">
+	<div id="map"></div>
+	<div id="cercacodi">cerca per codi</div>
+	<div id="cercanom">cerca per nom</div>
+	<div id="fitxa"></div>
+
+	
+	
+</body>
+
+</html>
