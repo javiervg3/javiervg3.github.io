@@ -96,7 +96,7 @@
 
 			}).addTo(map);
 
-			var unitatsFinca = L.geoJson.ajax('../datos/unitatsFinca_4326.geojson', {
+			var unitatsFinca = L.geoJson.ajax('../datos/ufinca.geojson', {
 
 				style: function(feature) {
 					var _color = {
@@ -159,9 +159,9 @@
 
 			var overlayMaps = {
 				"Delimitació del PNSC": limitPNSC,
-				"Delimitació municipal": limitMuni,	
-				"Unitats de Finca": unitatsFinca,				
-				"Inventari de Construccions": inventariConstruccions
+				"Delimitació municipal": limitMuni,		
+				"Inventari de Construccions": inventariConstruccions,
+				"Unitats de Finca": unitatsFinca
 				
 			};
 
