@@ -10,16 +10,20 @@ h1   {font-family:calibri; font-size:32px;}
 h2   {font-family:calibri; font-size:28px;}
 	
 .content{width:1000px; margin:auto;}	
-.header {position:fixed; top:0px; width:1000px; height:150px; background-color:#006687; z-index:3;}
-.menu	{position:fixed; top:150px; width:1000px; height:35px; background-color:#006687; text-align:right; z-index:3;}
-.wrapper{width:960px; margin:auto; padding:20px; background-color:white;}
+.header {position:fixed; top:0px; width:1000px; height:150px; background-color:white; color: black; z-index:3;}
+.menu	{position:fixed; top:150px; width:1000px; height:20px; background-color:#215868; z-index:3;}
+.wrapper{width:960px; margin:auto; padding:20px; padding-top: 190px; background-color:white;}
 
+.botoheader{height: 150px;}
+.fotoheader{height: 150px; padding-left: 40px;}
+
+.textheader{padding: 60px; color: black;}
+.nomheader{font-size: 40px;}
 
 
 .botoinventari{height: 180px; margin-bottom: 20px; background-color:#215868; color: white; border-radius: 4px;}
 .botoinventari:hover {background-color:#ba1419; color: white;}
 
 .nominventari{padding: 60px; font-size: 40px; text-decoration: none;}
-
 .fotoinventari {width:140px; height:140px; border-radius: 4px; padding: 20px;}
 
