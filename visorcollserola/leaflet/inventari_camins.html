@@ -23,7 +23,6 @@
 		var limitPNSC;
 		var limitMuni;
 		var inventariCamins;
-		var xarxaRodada;
 		var controlCapas;
 
 		function init() {
@@ -123,20 +122,7 @@
 				inventariCamins.bringToFront();
 			};
 
-
-			var xarxaRodada = L.geoJson.ajax('../datos/xarxa_rodada_4326.geojson', {
-
-				style: function(feature) {
-					var _color = {
-						color: '#ff0000',
-						weight: 4,
-						fillOpacity: 1
-					};
-					return _color;
-				},
-
-			});
-		
+	
 			var searchControlCodi = new L.Control.Search({
 				layer: inventariCamins,
 				propertyName: 'CODIPEPNAT',
@@ -196,8 +182,7 @@
 			var overlayMaps = {
 				"Delimitació del PNSC": limitPNSC,
 				"Delimitació municipal": limitMuni,		
-				"Inventari de Camins": inventariCamins,
-				"Xarxa rodada": xarxaRodada		
+				"Inventari de Camins": inventariCamins	
 			};
 
 			controlCapas = L.control.layers(baseMaps, overlayMaps, {
@@ -218,7 +203,6 @@
 			
 			function escriuCamins(e) {
 				
-				//console.info(e.target.feature.properties);
 				document.getElementById('fitxa').style.width = "310px";
 				var txtCamins = 
 					"<div class='fitxa'>"+

@@ -24,7 +24,6 @@
 		var limitMuni;
 		var inventariConstruccions;
 		var unitatsFinca;
-		var xarxaRodada;
 		var controlCapas;
 
 		function init() {
@@ -150,29 +149,6 @@
 			});
 
 
-			var xarxaRodada = L.geoJson.ajax('../datos/xarxa_rodada_4326.geojson', {
-
-				style: function(feature) {
-					var _color = {
-						color: '#ff0000',
-						weight: 4,
-						fillOpacity: 1
-					};
-					return _color;
-				},
-
-				onEachFeature: function(feature, layer) {
-					popupContent =
-					"<br><div class='titolpopup'>XARXA RODADA" + "</div>" + "</br>" +
-					"<br><div class='nomicodipopup'>" + feature.properties.CODIPEPNAT + " " + feature.properties.NOM + "</div>" + "</br>"
-					;
-					layer.bindPopup(popupContent);
-					layer.on('click',bringConstruccionsToFront);
-				}
-
-			});
-
-
 			var searchControlCodi = new L.Control.Search({
 				layer: inventariConstruccions,
 				propertyName: 'ID_MASIA',
@@ -233,8 +209,7 @@
 				"Delimitació del PNSC": limitPNSC,
 				"Delimitació municipal": limitMuni,		
 				"Inventari de Construccions": inventariConstruccions,
-				"Unitats de Finca": unitatsFinca,
-				"Xarxa rodada": xarxaRodada		
+				"Unitats de Finca": unitatsFinca
 			};
 
 			controlCapas = L.control.layers(baseMaps, overlayMaps, {
@@ -255,8 +230,7 @@
 				
 
 			function escriuConstru(e) {
-				
-				//console.info(e.target.feature.properties);
+			
 				document.getElementById('fitxa').style.width = "310px";
 				var txtConstruccions = 
 					"<div class='fitxa'>"+
