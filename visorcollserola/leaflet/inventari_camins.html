@@ -1,0 +1,256 @@
+<html lang="es">
+
+<head>
+	<link href="inventaricamins.css" rel="stylesheet" type="text/css" />
+	<meta charset="utf-8" />
+	<title>Inventari de Camins</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="author" content="autor" />
+	<meta name="description" content="descripción página">
+	<meta name="robots" content="index,follow">
+	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+	<link rel="stylesheet" href="css/leaflet-search.min.css" />
+
+	<script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+	<script src="js/leaflet.ajax.min.js"></script>
+	<script src="js/leaflet-search.min.js"></script>
+	
+	<script>
+		var map;
+		var ortoICGC;
+		var mapaICGC;
+		var mascaraPNSC;
+		var limitPNSC;
+		var limitMuni;
+		var inventariCamins;
+		var xarxaRodada;
+		var controlCapas;
+
+		function init() {
+
+			map = L.map('map', {
+				center: [41.434974, 2.091355],
+				zoom: 13,
+				zoomControl: false
+			});
+
+			L.control.zoom({
+     			position:'topleft'
+			}).addTo(map);
+
+			ortoICGC = L.tileLayer(
+				'https://geoserveis.icgc.cat/icc_mapesmultibase/noutm/wmts/orto/GRID3857/{z}/{x}/{y}.jpeg', {
+					maxZoom: 19,
+					minZoom: 13,
+					attribution: 'Orto ICGC',
+
+			}).addTo(map);
+
+			mapaICGC = L.tileLayer(
+				'https://geoserveis.icgc.cat/icc_mapesmultibase/noutm/wmts/topo/GRID3857/{z}/{x}/{y}.jpeg', {
+				maxZoom: 19,
+				minZoom: 13,
+				attribution: 'Mapa ICGC'
+			});
+
+			var mascaraPNSC = L.geoJson.ajax('../datos/mascaraPNSC_4326.geojson', {
+
+				style: function(feature) {
+					var _color = {
+						color: '#ffffff',
+						weight: 0,
+						fillOpacity: 0.3,
+						fillColor: '#ffffff'
+					};
+
+					return _color;
+				},
+
+			}).addTo(map);
+
+
+			var limitPNSC = L.geoJson.ajax('../datos/limitPNSC_4326.geojson', {
+
+				style: function(feature) {
+					var _color = {
+						color: '#009600',
+						weight: 4,
+						fillOpacity: 1,
+					};
+
+					return _color;
+				},
+				
+			}).addTo(map);
+
+
+			var limitMuni = L.geoJson.ajax('../datos/limitMuni_4326.geojson', {
+
+				style: function(feature) {
+					var _color = {
+						color: '#ffff64',
+						weight: 3,
+						fillOpacity: 1,
+					};
+
+					return _color;
+				},
+
+			}).addTo(map);
+
+
+			var inventariCamins = L.geoJson.ajax('../datos/inventari_camins_4326.geojson', {
+				
+				style: function(feature) {
+					var _color = {
+						color: '#d56f27',
+						weight: 5,
+						fillOpacity: 10
+					};
+
+					return _color;
+				},
+
+				onEachFeature: function(feature, layer) {
+					
+					layer.on('click',escriuCamins);
+				}
+
+			}).addTo(map);
+
+			function bringCaminsToFront(){				
+				console.log(inventariCamins);
+				inventariCamins.bringToFront();
+			};
+
+
+			var xarxaRodada = L.geoJson.ajax('../datos/xarxa_rodada_4326.geojson', {
+
+				style: function(feature) {
+					var _color = {
+						color: '#ff0000',
+						weight: 4,
+						fillOpacity: 1
+					};
+					return _color;
+				},
+
+			});
+		
+			var searchControlCodi = new L.Control.Search({
+				layer: inventariCamins,
+				propertyName: 'CODIPEPNAT',
+				circleLocation: true,
+				collapsed: false,
+				textErr: 'No trobat',
+				textPlaceholder: 'Cerca per codi...',
+				container: 'cercacodi'
+			});
+
+			searchControlCodi.on('search_locationfound', function(feature) {
+				feature.layer.setStyle({
+					fillColor: '#ff0000',
+					weight: 10,
+					opacity: 1					
+				});
+
+			}).on('search_collapsed', function() {
+				inventariCamins.eachLayer(function(layer) {
+				inventariCamins.resetStyle(layer);
+				});
+			});
+
+
+			var searchControlNom = new L.Control.Search({
+				layer: inventariCamins,
+				propertyName: 'NOMCAMI',
+				circleLocation: true,
+				collapsed: false,
+				textErr: 'No trobat',		
+				textPlaceholder: 'Cerca per nom... ',
+				container: 'cercanom'
+			});
+
+			searchControlNom.on('search_locationfound', function(feature) {
+				feature.layer.setStyle({
+					fillColor: '#ff0000',
+					weight: 2,
+					opacity: 1
+				});
+
+			}).on('search_collapsed', function() {
+				inventariCamins.eachLayer(function(layer) {
+				inventariCamins.resetStyle(layer);
+				});
+			});
+			
+			map.addControl(searchControlCodi);
+			map.addControl(searchControlNom);
+
+
+			var baseMaps = {
+				"Ortofoto ICGC": ortoICGC,
+				"Mapa Topogràfic ICGC": mapaICGC
+			};
+
+			var overlayMaps = {
+				"Delimitació del PNSC": limitPNSC,
+				"Delimitació municipal": limitMuni,		
+				"Inventari de Camins": inventariCamins,
+				"Xarxa rodada": xarxaRodada		
+			};
+
+			controlCapas = L.control.layers(baseMaps, overlayMaps, {
+				collapsed: true,
+				position: 'topleft',
+				sortLayers: true,
+				autoZIndex: true
+			});
+
+			controlCapas.addTo(map);
+
+			controlEscala = L.control.scale({
+				position: 'bottomleft'
+
+			});
+
+			controlEscala.addTo(map);
+			
+			function escriuCamins(e) {
+				
+				//console.info(e.target.feature.properties);
+				document.getElementById('fitxa').style.width = "310px";
+				var txtCamins = 
+					"<div class='fitxa'>"+
+						"<a class='tancaFitxa' id='tancaFitxa' href='#' title='Tanca' style='display: block;'><span>⊗</span></a>"+
+						"<br><div class='titolfitxa'>INVENTARI DE CAMINS DEL PNSC" + "</div>" + "</br>" +
+						"<br><div class='nomicodi'>" + e.target.feature.properties.CODIPEPNAT + " " + e.target.feature.properties.NOMCAMI + "</div>" + "</br>" +
+						"<br>LONGITUD: " + e.target.feature.properties.LONGITUD + "m</br>" +
+						"<br><a class='bt_pdf' target='_blank' href='../pdf/" + e.target.feature.properties.ID_PDF + ".pdf'>" + "VEURE FITXA COMPLETA" + "</a>" + "</br>"				
+					;
+					
+				document.getElementById('fitxa').innerHTML=txtCamins;
+				document.getElementById('tancaFitxa').onclick = function(){
+					document.getElementById('fitxa').style.width = "10px";
+					document.getElementById('fitxa').innerHTML = "";
+				}
+			};
+
+		}
+	</script>
+</head>
+
+<body onLoad="init()">
+	<div id="map"></div>
+	<div class="cercacontainer">
+		<div id="cercacontainercodi">
+			<div id="cercacodi"></div>
+		</div>	
+		<div id="cercacontainernom">
+			<div id="cercanom"></div>
+		</div>
+	</div>
+	<div id="fitxa"></div>	
+</body>
+
+</html>

@@ -3,7 +3,7 @@
 <head>
 	<link href="inventariconstruccions.css" rel="stylesheet" type="text/css" />
 	<meta charset="utf-8" />
-	<title>Inventari de Construccions</title>
+	<title>Inventari de masies, cases rurals i altres construccions</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta name="author" content="autor" />
 	<meta name="description" content="descripción página">
@@ -14,11 +14,7 @@
 	<script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
 	<script src="js/leaflet.ajax.min.js"></script>
 	<script src="js/leaflet-search.min.js"></script>
-	<style>
-		.nommasia{	
-			font-size: 20px;
-		}
-	</style>
+	
 	<script>
 		var map;
 		var ortoICGC;
@@ -28,14 +24,20 @@
 		var limitMuni;
 		var inventariConstruccions;
 		var unitatsFinca;
+		var xarxaRodada;
 		var controlCapas;
 
 		function init() {
 
 			map = L.map('map', {
 				center: [41.434974, 2.091355],
-				zoom: 13
+				zoom: 13,
+				zoomControl: false
 			});
+
+			L.control.zoom({
+     			position:'topleft'
+			}).addTo(map);
 
 			ortoICGC = L.tileLayer(
 				'https://geoserveis.icgc.cat/icc_mapesmultibase/noutm/wmts/orto/GRID3857/{z}/{x}/{y}.jpeg', {
@@ -96,34 +98,8 @@
 
 			}).addTo(map);
 
-			var unitatsFinca = L.geoJson.ajax('../datos/ufinca.geojson', {
-
-				style: function(feature) {
-					var _color = {
-						color: '#ffffff',
-						weight: 1,
-						fillOpacity: 0.3,
-						fillColor: '#ffbf6c'
-					};
-					return _color;
-				},
-
-				onEachFeature: function(feature, layer) {
-					popupContent =
-					"<br>UNITAT DE FINCA</br>" +
-					"<br> " + " " + "</br>" +
-					"<img width=150 src='../fotos/" + feature.properties.ID_FOTO +".jpg'>"+
-					"<br> " + " " + "</br>" +
-					"<br> " + feature.properties.ID_CONSTRU + " " + feature.properties.NOMFINCA +  "</br>" +
-					"<br>SUPERFÍCIE: " + feature.properties.AREA + "ha</br>" 
-					;
-					layer.bindPopup(popupContent);
-				}
-
-			});
-
 			var inventariConstruccions = L.geoJson.ajax('../datos/inventari_construccions_4326.geojson', {
-
+				
 				style: function(feature) {
 					var _color = {
 						color: '#ffffff',
@@ -140,52 +116,78 @@
 					layer.on('click',escriuConstru);
 				}
 
+			}).addTo(map);
+
+			function bringConstruccionsToFront(){				
+				console.log(inventariConstruccions);
+				inventariConstruccions.bringToFront();
+			};
+
+
+			var unitatsFinca = L.geoJson.ajax('../datos/ufinca.geojson', {
+
+				style: function(feature) {
+					var _color = {
+						color: '#ffffff',
+						weight: 1,
+						fillOpacity: 0.3,
+						fillColor: '#ffbf6c'
+					};
+					return _color;
+				},
+
+				onEachFeature: function(feature, layer) {
+					popupContent =
+					"<br><div class='titolpopup'>UNITAT DE FINCA" + "</div>" + "</br>" +
+					"<img width=180 src='../fotos/" + feature.properties.ID_FOTO +".jpg'>"+
+					"<br><div class='nomicodipopup'>" + feature.properties.ID_CONSTRU + " " + feature.properties.NOMFINCA + "</div>" + "</br>" +
+					"<br>SUPERFÍCIE: " + feature.properties.AREA + " ha</br>" 
+					;
+					layer.bindPopup(popupContent);
+					layer.on('click',bringConstruccionsToFront);
+				}
+
 			});
 
-			
+
+			var xarxaRodada = L.geoJson.ajax('../datos/xarxa_rodada_4326.geojson', {
+
+				style: function(feature) {
+					var _color = {
+						color: '#ff0000',
+						weight: 4,
+						fillOpacity: 1
+					};
+					return _color;
+				},
+
+				onEachFeature: function(feature, layer) {
+					popupContent =
+					"<br><div class='titolpopup'>XARXA RODADA" + "</div>" + "</br>" +
+					"<br><div class='nomicodipopup'>" + feature.properties.CODIPEPNAT + " " + feature.properties.NOM + "</div>" + "</br>"
+					;
+					layer.bindPopup(popupContent);
+					layer.on('click',bringConstruccionsToFront);
+				}
+
+			});
+
+
 			var searchControlCodi = new L.Control.Search({
 				layer: inventariConstruccions,
 				propertyName: 'ID_MASIA',
-				circleLocation: true
-			});
-
-			
-
-
-			var baseMaps = {
-				"Ortofoto ICGC": ortoICGC,
-				"Mapa Topogràfic ICGC": mapaICGC
-			};
-
-			var overlayMaps = {
-				"Delimitació del PNSC": limitPNSC,
-				"Delimitació municipal": limitMuni,		
-				"Inventari de Construccions": inventariConstruccions,
-				"Unitats de Finca": unitatsFinca
-				
-			};
-
-			controlCapas = L.control.layers(baseMaps, overlayMaps, {
+				circleLocation: true,
 				collapsed: false,
-				position: 'topleft'
-
+				textErr: 'No trobat',
+				textPlaceholder: 'Cerca per codi...',
+				container: 'cercacodi'
 			});
 
-			controlCapas.addTo(map);
-
-			controlEscala = L.control.scale({
-				position: 'bottomleft'
-
-			});
-
-			controlEscala.addTo(map);
-			
-			
 			searchControlCodi.on('search_locationfound', function(feature) {
 				feature.layer.setStyle({
 					fillColor: '#ff0000',
 					weight: 10,
-					opacity: 1,
+					opacity: 1					
 				});
 
 			}).on('search_collapsed', function() {
@@ -198,14 +200,18 @@
 			var searchControlNom = new L.Control.Search({
 				layer: inventariConstruccions,
 				propertyName: 'LOC_NOM',
-				circleLocation: true
+				circleLocation: true,
+				collapsed: false,
+				textErr: 'No trobat',		
+				textPlaceholder: 'Cerca per nom... ',
+				container: 'cercanom'
 			});
 
 			searchControlNom.on('search_locationfound', function(feature) {
 				feature.layer.setStyle({
 					fillColor: '#ff0000',
 					weight: 2,
-					opacity: 1,
+					opacity: 1
 				});
 
 			}).on('search_collapsed', function() {
@@ -215,35 +221,67 @@
 			});
 			
 			map.addControl(searchControlCodi);
-
 			map.addControl(searchControlNom);
 
-			
+
+			var baseMaps = {
+				"Ortofoto ICGC": ortoICGC,
+				"Mapa Topogràfic ICGC": mapaICGC
+			};
+
+			var overlayMaps = {
+				"Delimitació del PNSC": limitPNSC,
+				"Delimitació municipal": limitMuni,		
+				"Inventari de Construccions": inventariConstruccions,
+				"Unitats de Finca": unitatsFinca,
+				"Xarxa rodada": xarxaRodada		
+			};
+
+			controlCapas = L.control.layers(baseMaps, overlayMaps, {
+				collapsed: true,
+				position: 'topleft',
+				sortLayers: true,
+				autoZIndex: true
+			});
+
+			controlCapas.addTo(map);
+
+			controlEscala = L.control.scale({
+				position: 'bottomleft'
+
+			});
+
+			controlEscala.addTo(map);
+				
 
 			function escriuConstru(e) {
-
-			console.info(e.target.feature.properties);
-			var txtConstruccions = "<div class='fitxa'>"+
-					"<br>INVENTARI DE CONSTRUCCIONS</br>" +
-					"<br> " + " " + "</br>" +
-					"<img width=280 src='../fotos/" + e.target.feature.properties.ID_FOTO +".jpg'>"+
-					"<br> " + " " + "</br>" +
-					"<br> " + e.target.feature.properties.ID_MASIA + " " + e.target.feature.properties.LOC_NOM +  "</br>" +
-					"<br>ADREÇA: " + e.target.feature.properties.LOC_ADR + "</br>" +
-					"<br>MUNICIPI: " + e.target.feature.properties.LOC_CODIIN + " " +e.target.feature.properties.LOC_MUN + "</br>" +
-					"<br>TIPOLOGIA: " + e.target.feature.properties.TIP_TIP + "</br>" +
-					"<br>REF. CADASTRAL: " + e.target.feature.properties.DAD_REFCAD + "</br>" +
-					"<br>SOSTRE: " + e.target.feature.properties.DAD_REFC_1 + "m2</br>" +
-					"<br>TITULARITAT: " + e.target.feature.properties.DAD_REFC_2 + "</br>" +
-					"<br>CAMÍ D'ACCÉS: " + e.target.feature.properties.ACCES_CODI + "</br>" +
-					"<br>" + e.target.feature.properties.DADES_VOL + "</br>"+
-					"<br> " + " " + "</br>" +
-					"<br><a target='_blank' href='../pdf/" + e.target.feature.properties.ID_PDF + ".pdf'>" + "VEURE FITXA COMPLETA" + "</a>" + "</br>"	
-					
-				;
 				
-			document.getElementById('fitxa').innerHTML=txtConstruccions;
-
+				//console.info(e.target.feature.properties);
+				document.getElementById('fitxa').style.width = "310px";
+				var txtConstruccions = 
+					"<div class='fitxa'>"+
+						"<a class='tancaFitxa' id='tancaFitxa' href='#' title='Tanca' style='display: block;'><span>⊗</span></a>"+
+						"<br><div class='titolfitxa'>INVENTARI DE MASIES CASES RURALS I ALTRES CONSTRUCCIONS" + "</div>" + "</br>" +
+						"<img width=295 src='../fotos/" + e.target.feature.properties.ID_FOTO +".jpg'>"+
+						"<br><div class='nomicodi'>" + e.target.feature.properties.ID_MASIA + " " + e.target.feature.properties.LOC_NOM + "</div>" + "</br>" +
+						"<br>ADREÇA: " + e.target.feature.properties.LOC_ADR + "</br>" +
+						"<br>MUNICIPI: " + e.target.feature.properties.LOC_CODIIN + " " +e.target.feature.properties.LOC_MUN + "</br>" +
+						"<br>TIPOLOGIA: " + e.target.feature.properties.TIP_TIP + "</br>" +
+						"<br>REF. CADASTRAL: " + e.target.feature.properties.DAD_REFCAD + "</br>" +
+						"<br>SOSTRE: " + e.target.feature.properties.DAD_REFC_1 + "m2</br>" +
+						"<br>TITULARITAT: " + e.target.feature.properties.DAD_REFC_2 + "</br>" +
+						"<br>CAMÍ D'ACCÉS: " + e.target.feature.properties.ACCES_CODI + "</br>" +
+						"<br>" + e.target.feature.properties.DADES_VOL + "</br>"+
+						"<br>" + " " + "</br>" +
+						"<br><a class='bt_pdf' target='_blank' href='../pdf/" + e.target.feature.properties.ID_PDF + ".pdf'>" + "VEURE FITXA COMPLETA" + "</a>" + "</br>"
+					
+					;
+					
+				document.getElementById('fitxa').innerHTML=txtConstruccions;
+				document.getElementById('tancaFitxa').onclick = function(){
+					document.getElementById('fitxa').style.width = "10px";
+					document.getElementById('fitxa').innerHTML = "";
+				}
 			};
 
 		}
@@ -252,12 +290,15 @@
 
 <body onLoad="init()">
 	<div id="map"></div>
-	<div id="cercacodi">cerca per codi</div>
-	<div id="cercanom">cerca per nom</div>
-	<div id="fitxa"></div>
-
-	
-	
+	<div class="cercacontainer">
+		<div id="cercacontainercodi">
+			<div id="cercacodi"></div>
+		</div>	
+		<div id="cercacontainernom">
+			<div id="cercanom"></div>
+		</div>
+	</div>
+	<div id="fitxa"></div>	
 </body>
 
 </html>
