@@ -209,8 +209,11 @@
 						"<a class='tancaFitxa' id='tancaFitxa' href='#' title='Tanca' style='display: block;'><span>⊗</span></a>"+
 						"<br><div class='titolfitxa'>INVENTARI DE CAMINS DEL PNSC" + "</div>" + "</br>" +
 						"<br><div class='nomicodi'>" + e.target.feature.properties.CODIPEPNAT + " " + e.target.feature.properties.NOMCAMI + "</div>" + "</br>" +
-						"<br>LONGITUD: " + e.target.feature.properties.LONGITUD + "m</br>" +
-						"<br><a class='bt_pdf' target='_blank' href='../pdf/" + e.target.feature.properties.ID_PDF + ".pdf'>" + "VEURE FITXA COMPLETA" + "</a>" + "</br>"				
+						"<br>LONGITUD: " + e.target.feature.properties.LONG_CAMI + "m</br>" +
+						"<br>TIPOLOGIA: " + e.target.feature.properties.TIPOLOGIA + "m</br>" +
+						"<br>TITULARITAT: " + e.target.feature.properties.TITULAR + "m</br>" +
+						"<br>ADMIN. MANTENIMENT: " + e.target.feature.properties.ADMIN + "m</br>" +
+						"<br><a class='bt_pdf' target='_blank' href='../pdf/" + e.target.feature.properties.NOM_PDF + ".pdf'>" + "VEURE FITXA COMPLETA" + "</a>" + "</br>"				
 					;
 					
 				document.getElementById('fitxa').innerHTML=txtCamins;
